@@ -1,0 +1,428 @@
+{
+  "name": "Website Ai Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-nano"
+        },
+        "options": {}
+      },
+      "id": "659afcb3-545c-47d9-a15a-f9218f28560d",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [-80, 240],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "5y6VBEMQ2N4tcbGY",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1caf7adc-d672-422f-a4f6-199f7a335b07",
+              "name": "name",
+              "value": "={{$json[\"body\"][\"name\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "2656e027-c212-4eb6-ac27-06f0134334ab",
+              "name": "email",
+              "value": "={{$json[\"body\"][\"email\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "0903f668-13aa-401e-8d80-2475d40230eb",
+              "name": "message",
+              "value": "={{$json[\"body\"][\"message\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "22776788-cbe1-4546-950a-17a4dec56a73",
+              "name": "phone",
+              "value": "={{$json[\"body\"][\"phone\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "9482bb6c-20c5-4a25-ad81-49f32b33590a",
+              "name": "=date",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "6da8265a-527d-4e64-98bb-64df9045c425",
+              "name": "sessionId",
+              "value": "={{ $json.body.sessionId || $json.body.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-624, 288],
+      "id": "6ce8722c-d2f5-45ba-87c4-e8ad9a1bb085",
+      "name": "Setter"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Setter').item.json.sessionId }}",
+        "contextWindowLength": 3
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [32, 240],
+      "id": "762de08d-e22b-42b6-9a8f-3af42ae22aa7",
+      "name": "Conversation Memory"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "459d80ad-c8f1-4454-a81e-a605f994611c",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-800, 304],
+      "id": "3778ff72-b247-4d7d-ae24-da106c35b630",
+      "name": "Webhook",
+      "webhookId": ""
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "<YOUR_MESSAGE_HERE>",
+        "options": {}
+      },
+      "id": "afe1f56c-a8d3-4e77-b00d-101a0986cb9e",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [-80, 48],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "chatId": "1886983391",
+        "text": "=  📨 New Contact Lead Submission\n\n👤 Name: {{$node[\"Setter\"].json[\"name\"]}}\n✉️ Email: {{$node[\"Setter\"].json[\"email\"]}}\n📞 Message: {{$node[\"Setter\"].json[\"message\"]}}\n💬 Phone: {{$node[\"Setter\"].json[\"phone\"]}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [480, 432],
+      "id": "14449414-75ef-4b27-a3db-bd74e15adb02",
+      "name": "TELEGRAM-MESSAGE",
+      "webhookId": "",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Portfolio Contacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $('Setter').item.json.date }}",
+            "Name": "={{ $('Setter').item.json.name }}",
+            "Phone": "={{ $('Setter').item.json.phone}}",
+            "Email": "={{ $('Setter').item.json.email}}",
+            "Message": "={{ $('Setter').item.json.message}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [-176, 448],
+      "id": "9f0c65ef-1b66-458d-8b40-df933f67acfa",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n3Yl2JRO1lGJ3zQZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "Portfolio Contact Lead Received!",
+        "emailType": "html",
+        "message": "<YOUR_MESSAGE_HERE>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [48, 432],
+      "id": "570e5183-6f30-4655-a94d-7a8083eadeda",
+      "name": "Gmail_Admin_Copy",
+      "webhookId": "5d6bc0fa-73d1-4451-8cd8-e861d63f609c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OpTsaQnPFmNWfPV2",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Setter').item.json.email}}",
+        "subject": "=Thank you for reaching out, {{ $('Setter').item.json.name}}",
+        "message": "<YOUR_MESSAGE_HERE>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [272, 432],
+      "id": "a402da99-6ba6-41db-8689-27be2cf294ea",
+      "name": "Gmail_AutoReply",
+      "webhookId": "752588fe-dc45-49bf-8fb5-e265058e0496",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OpTsaQnPFmNWfPV2",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true, \"message\": \"Form submitted successfully\" }",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [288, 48],
+      "id": "d84151b3-9ab9-432a-ab5c-21d09a931f6f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [-448, 304],
+      "id": "8a9c5608-0f7c-4ac4-9ae1-35ddd343e3ee",
+      "name": "Limit"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setter": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Setter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Gmail_Admin_Copy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail_Admin_Copy": {
+      "main": [
+        [
+          {
+            "node": "Gmail_AutoReply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail_AutoReply": {
+      "main": [
+        [
+          {
+            "node": "TELEGRAM-MESSAGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "3abb8e5e-0199-48dc-802a-1320d7b23c0b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6a2bad258c42dae09e1648c7e3b4503147bf3e795e476d44fd7e3c8a5d9468fe"
+  }
+}
