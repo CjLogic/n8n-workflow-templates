@@ -1,8 +1,8 @@
-# Website AI Assistant - n8n Workflow
+# Website AI Assistant - N8N Workflow
 
 ## Overview
 
-This n8n workflow automates contact form submissions on your website by capturing user inputs and routing the data to various communication channels and storage solutions for easy follow-up and management.
+This n8n workflow automates contact form submissions on your website by capturing user inputs and routing the data to Gmail, Google Sheets, & Telegram.
 
 ## Features
 
